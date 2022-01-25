@@ -1,6 +1,6 @@
 # Use the official maven/Java 11 image to create a build artifact.
 # https://hub.docker.com/_/maven
-FROM gradle:6-jdk11-alpine AS build
+FROM gradle:6-jdk11-alpine AS build-env
 
 # Set the working directory to /app
 WORKDIR /app
