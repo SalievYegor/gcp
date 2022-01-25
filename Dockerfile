@@ -5,7 +5,8 @@ FROM gradle:6-jdk11-alpine AS build
 # Set the working directory to /app
 WORKDIR /app
 # Copy the pom.xml file to download dependencies
-COPY pom.xml ./
+COPY build.gradle ./
+COPY settings.gradle ./
 # Copy local code to the container image.
 COPY src ./src
 
