@@ -1,6 +1,6 @@
 # Use the official maven/Java 11 image to create a build artifact.
 # https://hub.docker.com/_/maven
-FROM gradle:7.3.3-jdk8-alpine AS build
+FROM gradle:6-jdk11-alpine AS build
 
 # Set the working directory to /app
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN gradle build
 # Use OpenJDK for base image.
 # https://hub.docker.com/_/openjdk
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-FROM openjdk:8-jre-slim
+FROM openjdk:11-jre-slim
 
 # Copy the jar to the production image from the builder stage.
 COPY --from=build-env /app/build/libs/gcp-0.0.1-SNAPSHOT.jar /gcp-0.0.1-SNAPSHOT.jar
