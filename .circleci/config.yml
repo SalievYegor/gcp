@@ -1,20 +1,66 @@
-version: 2
+version: 2.1
+
+executors:
+  machine-executor:
+    #    working_directory: ~/app
+    machine:
+      image: ubuntu-2004:202008-01
+commands:
+  checkout-code:
+    steps:
+      - checkout:
+          path: $CIRCLE_PROJECT_REPONAME
+  build:
+    description: "Build project"
+    steps:
+      - run:
+          command: |
+            cd ~/project
+            chmod +x gradlew
+            ./gradlew build -x test
+  run-test:
+    description: "Running test"
+    steps:
+      - run:
+          command: |
+            cd ~/project
+            chmod +x gradlew
+            ./gradlew test
+#  setup-integration-tests:
+#    steps:
+#      - run:
+#          name: Setup integration tests
+#          command: |
+#            apt update && apt install git curl -y
+#            git config --global user.email "circleci@sema4.com" && git config --global user.name "circleci"
+#            git clone https://$GH_TOKEN@github.com/sema4genomics/s4-workbench-schema.git ../s4-workbench-schema
+#            ../s4-workbench-schema/gradlew -p ../s4-workbench-schema setupLocalItDatabase -i
+
 jobs:
   build:
     docker:
-      - image: cimg/openjdk:11.0.0
-    working_directory: ~/repo
-    environment:
-      TERM: dumb
+      - image: circleci/openjdk:11.0.3-jdk-stretch
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}
-            - v1-dependencies-
-      - run: gradle dependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-      - run: gradle test
+      - build
+  test:
+    executor: machine-executor
+    steps:
+      - checkout
+      - store_artifacts:
+          path: build/reports/tests/test
+      - store_test_results:
+          path: build/test-results/test
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore:
+                - develop
+      - test:
+          requires:
+            - build
